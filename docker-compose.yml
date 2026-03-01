@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  hexstrike-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hexstrike-ai
+    ports:
+      - "8888:8888"
+    environment:
+      PYTHONIOENCODING: utf-8
+      PYTHONUNBUFFERED: 1
+      HEXSTRIKE_HOST: 0.0.0.0
+      HEXSTRIKE_PORT: 8888
+    volumes:
+      - .:/opt/hexstrike:delegated
+      - /opt/hexstrike/venv
+      - ./hexstrike.log:/opt/hexstrike/hexstrike.log
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+    networks:
+      - hexstrike-network
+
+networks:
+  hexstrike-network:
+    driver: bridge

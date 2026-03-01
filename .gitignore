@@ -1,0 +1,78 @@
+# Environment & Virtual Environments
+env/
+ENV/
+.venv
+*.egg-info/
+*.eggs/
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Logs & Temporary Files
+*.log
+hexstrike.log
+*.tmp
+*.bak
+*.temp
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Artifacts & Build
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+*.exe
+
+# Local Development
+.env
+.env.local
+.env.*.local
+secrets.json
+config.local.json
+
+# Security & Credentials
+.ssh/
+*.pem
+*.key
+*.crt
+credentials.json
+tokens.json
+
+# Dependencies (optional - keep if you want reproducible builds)
+requirements.lock
+
+# Generated Files
+*.pid
+*.sock
+*.pid.lock
