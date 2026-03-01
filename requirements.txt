@@ -82,3 +82,21 @@ bcrypt==4.0.1                   # Pin bcrypt version for passlib compatibility (
 # 5. Browser Agent requires Chrome/Chromium and ChromeDriver installation
 #
 # For complete installation instructions and setup guides, see README.md
+
+# ============================================================================
+# SECURITY CLI TOOLS (INSTALLED AS PYTHON PACKAGES)
+# ============================================================================
+volatility3>=2.4.0          # Memory forensics → vol binary
+ROPgadget>=7.3              # ROP gadget finder → ROPgadget binary
+ropper>=1.13.0              # ROP gadget finder → ropper binary
+checkov>=3.0.0              # IaC security scanner → checkov binary
+kube-hunter>=0.6.8          # K8s security scanner → kube-hunter binary
+sherlock-project>=0.14.3    # Username OSINT → sherlock binary
+shodan>=1.28.0              # Shodan CLI → shodan binary
+prowler>=3.0.0              # Cloud security → prowler binary
+arjun>=2.2.1                # HTTP param discovery → arjun binary
+uro>=0.0.6                  # URL deduplication → uro binary
+paramspider>=2.0            # Parameter spider → paramspider binary
+spiderfoot>=4.0             # OSINT framework → spiderfoot binary
+censys>=2.2.0               # Censys CLI → censys binary
+hibp>=0.3.0                 # HIBP checker → hibp binary
