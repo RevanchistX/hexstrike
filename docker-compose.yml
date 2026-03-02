@@ -1,22 +1,47 @@
-version: '3.8'
-
 services:
   hexstrike:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: hexstrike-ai
+    container_name: hexstrike
     ports:
       - "8888:8888"
-    volumes:
-      - ./hexstrike.log:/opt/hexstrike/hexstrike.log
     environment:
       - PYTHONIOENCODING=utf-8
       - PYTHONUNBUFFERED=1
     restart: unless-stopped
+    depends_on:
+        - ollama
     networks:
-      - hexstrike-network
-
+        - hexstrike
+        
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama-data:/root/.ollama
+    restart: unless-stopped
+    networks:
+        - hexstrike
+    
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    volumes:
+      - ./webui-data:/app/backend/data
+    depends_on:
+      - ollama
+    ports:
+      - "9999:8080"
+    environment:
+      - 'OLLAMA_BASE_URL=http://ollama:11434'
+    restart: unless-stopped
+    networks:
+        - hexstrike
+    
 networks:
-  hexstrike-network:
-    driver: bridge
+    hexstrike:
+        name: hexstrike
+        driver: bridge

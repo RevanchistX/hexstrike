@@ -9029,18 +9029,18 @@ def health_check():
     ]
 
     network_tools = [
-        "rustscan", "masscan", "autorecon", "nbtscan", "arp-scan", "responder",
-        "nxc", "enum4linux-ng", "rpcclient", "enum4linux"
+        "masscan", "autorecon", "nbtscan", "arp-scan", "responder",
+        "enum4linux-ng", "rpcclient", "enum4linux"
     ]
 
     web_security_tools = [
         "ffuf", "feroxbuster", "dirsearch", "dotdotpwn", "xsser", "wfuzz",
         "gau", "waybackurls", "arjun", "paramspider", "x8", "jaeles", "dalfox",
-        "httpx", "wafw00f", "burpsuite", "zaproxy", "katana", "hakrawler"
+        "httpx", "wafw00f", "katana", "hakrawler"
     ]
 
     vuln_scanning_tools = [
-        "nuclei", "wpscan", "graphql-scanner", "jwt-analyzer"
+        "nuclei", "wpscan", "graphql-scanner", "graphql-cop", "jwt_tool", "jwtxpl"
     ]
 
     password_tools = [
@@ -9049,24 +9049,24 @@ def health_check():
 
     binary_tools = [
         "gdb", "radare2", "binwalk", "ropgadget", "checksec", "objdump",
-        "ghidra", "pwntools", "one-gadget", "ropper", "angr", "libc-database",
+        "pwntools", "one-gadget", "ropper", "libc-database",
         "pwninit"
     ]
 
     forensics_tools = [
-        "volatility3", "vol", "steghide", "hashpump", "foremost", "exiftool",
+        "volatility3", "vol", "steghide", "foremost", "exiftool",
         "strings", "xxd", "file", "photorec", "testdisk", "scalpel", "bulk-extractor",
-        "stegsolve", "zsteg", "outguess"
+        "zsteg"
     ]
 
     cloud_tools = [
-        "prowler", "scout-suite", "trivy", "kube-hunter", "kube-bench",
-        "docker-bench-security", "checkov", "terrascan", "falco", "clair"
+        "prowler", "trivy", "kube-hunter", "kube-bench",
+        "docker-bench-security", "checkov", "terrascan"
     ]
 
     osint_tools = [
         "amass", "subfinder", "fierce", "dnsenum", "theharvester", "sherlock",
-        "social-analyzer", "recon-ng", "maltego", "spiderfoot", "shodan-cli",
+        "recon-ng", "spiderfoot", "shodan-cli",
         "censys-cli", "have-i-been-pwned"
     ]
 
@@ -9075,17 +9075,17 @@ def health_check():
     ]
 
     api_tools = [
-        "api-schema-analyzer", "postman", "insomnia", "curl", "httpie", "anew", "qsreplace", "uro"
+        "curl", "httpie", "anew", "qsreplace", "uro"
     ]
 
     wireless_tools = [
-        "kismet", "wireshark", "tshark", "tcpdump"
+        "tshark", "tcpdump"
     ]
 
     additional_tools = [
-        "smbmap", "volatility", "sleuthkit", "autopsy", "evil-winrm",
+        "smbmap", "volatility", "sleuthkit", "evil-winrm",
         "paramspider", "airmon-ng", "airodump-ng", "aireplay-ng", "aircrack-ng",
-        "msfvenom", "msfconsole", "graphql-scanner", "jwt-analyzer"
+        "msfvenom", "msfconsole"
     ]
 
     all_tools = (

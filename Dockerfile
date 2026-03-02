@@ -26,10 +26,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     nikto gobuster dirb ffuf sqlmap wfuzz dirsearch wafw00f wpscan xsser dotdotpwn httpie \
     \
     # Password cracking
-    hydra john hashcat medusa patator hashpump hashcat-utils ophcrack hash-identifier \
+    hydra john hashcat medusa patator hashcat-utils ophcrack hash-identifier \
     \
     # Additional network scanning
-    rustscan nxc autorecon \
+    autorecon \
     \
     # SMB & Windows enumeration
     smbmap enum4linux samba-common-bin enum4linux-ng \
@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     aircrack-ng \
     \
     # Forensics & Reverse Engineering
-    binwalk foremost scalpel bulk-extractor exiftool steghide testdisk sleuthkit outguess \
+    binwalk foremost scalpel bulk-extractor exiftool steghide testdisk sleuthkit \
     gdb radare2 binutils file \
     \
     # OSINT & Reconnaissance
@@ -67,40 +67,49 @@ RUN go install github.com/projectdiscovery/katana/cmd/katana@latest && \
     go install github.com/tomnomnom/qsreplace@latest && \
     go install github.com/jaeles-project/jaeles@latest
 
-# Install Ruby gems (CTF/pentest tools)
-RUN gem install one-gadget zsteg --no-document
+# Install JWT, GraphQL, and other security tools from GitHub
+RUN pip3 install --break-system-packages jwtxploiter && \
+    git clone --depth 1 https://github.com/ticarpi/jwt_tool /opt/jwt_tool && \
+    pip3 install --break-system-packages --ignore-installed -r /opt/jwt_tool/requirements.txt && \
+    chmod +x /opt/jwt_tool/jwt_tool.py && \
+    ln -sf /opt/jwt_tool/jwt_tool.py /usr/local/bin/jwt_tool && \
+    git clone --depth 1 https://github.com/davidfortytwo/graphql-scanner /opt/graphql-scanner && \
+    ([ -f /opt/graphql-scanner/requirements.txt ] && pip3 install --break-system-packages --ignore-installed -r /opt/graphql-scanner/requirements.txt || true) && \
+    chmod +x /opt/graphql-scanner/scan.py && \
+    ln -sf /opt/graphql-scanner/scan.py /usr/local/bin/graphql-scanner && \
+    git clone --depth 1 https://github.com/dolevf/graphql-cop /opt/graphql-cop && \
+    pip3 install --break-system-packages --ignore-installed -r /opt/graphql-cop/requirements.txt && \
+    chmod +x /opt/graphql-cop/graphql-cop.py && \
+    ln -sf /opt/graphql-cop/graphql-cop.py /usr/local/bin/graphql-cop && \
+    git clone --depth 1 https://github.com/devanshbatham/paramspider /opt/paramspider && \
+    ([ -f /opt/paramspider/requirements.txt ] && pip3 install --break-system-packages --ignore-installed -r /opt/paramspider/requirements.txt || true) && \
+    chmod +x /opt/paramspider/paramspider.py && \
+    ln -sf /opt/paramspider/paramspider.py /usr/local/bin/paramspider && \
+    git clone --depth 1 https://github.com/smicallef/spiderfoot /opt/spiderfoot && \
+    ([ -f /opt/spiderfoot/requirements.txt ] && pip3 install --break-system-packages --ignore-installed -r /opt/spiderfoot/requirements.txt || true) && \
+    chmod +x /opt/spiderfoot/sf.py && \
+    ln -sf /opt/spiderfoot/sf.py /usr/local/bin/spiderfoot && \
+    git clone --depth 1 https://github.com/uppusername/hibp /opt/hibp && \
+    ([ -f /opt/hibp/requirements.txt ] && pip3 install --break-system-packages --ignore-installed -r /opt/hibp/requirements.txt || true) && \
+    chmod +x /opt/hibp/hibp.py 2>/dev/null || chmod +x /opt/hibp/hibp || true && \
+    ln -sf /opt/hibp/hibp.py /usr/local/bin/hibp || ln -sf /opt/hibp/hibp /usr/local/bin/hibp || true
 
-# Download prebuilt binaries from GitHub releases
-RUN \
-    # pwninit — binary patcher for CTF pwn challenges
-    curl -sL https://github.com/io12/pwninit/releases/latest/download/pwninit \
-        -o /usr/local/bin/pwninit && chmod +x /usr/local/bin/pwninit && \
-    # kube-bench — Kubernetes CIS benchmark
-    curl -sL $(curl -s https://api.github.com/repos/aquasecurity/kube-bench/releases/latest \
-        | grep 'browser_download_url.*linux_amd64.tar.gz"' | cut -d'"' -f4) \
-        | tar -xz -C /usr/local/bin kube-bench && \
-    # terrascan — IaC security scanner
-    curl -sL $(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest \
-        | grep 'browser_download_url.*Linux_x86_64.tar.gz"' | cut -d'"' -f4) \
-        | tar -xz -C /usr/local/bin terrascan && \
-    # x8 — hidden parameter discovery (Rust)
-    curl -sL $(curl -s https://api.github.com/repos/sh1yo/x8/releases/latest \
-        | grep 'browser_download_url.*x86_64-linux"' | cut -d'"' -f4) \
-        -o /usr/local/bin/x8 && chmod +x /usr/local/bin/x8 && \
-    # docker-bench-security — Docker CIS audit script
-    curl -sL https://raw.githubusercontent.com/docker/docker-bench-security/main/docker-bench-security.sh \
-        -o /usr/local/bin/docker-bench-security && chmod +x /usr/local/bin/docker-bench-security && \
-    # libc-database — libc lookup for CTF pwn
-    git clone --depth 1 https://github.com/niklasb/libc-database /opt/libc-database && \
-    ln -sf /opt/libc-database/get /usr/local/bin/libc-database
+# Install Ruby gems (CTF/pentest tools)
+RUN gem install one_gadget zsteg --no-document
+
+# Download prebuilt binaries from GitHub releases (with error handling)
+RUN curl -sL https://github.com/io12/pwninit/releases/latest/download/pwninit -o /usr/local/bin/pwninit && chmod +x /usr/local/bin/pwninit || true && \
+    curl -sL $(curl -s https://api.github.com/repos/aquasecurity/kube-bench/releases/latest 2>/dev/null | grep 'browser_download_url.*linux_amd64.tar.gz"' | cut -d'"' -f4) 2>/dev/null | tar -xz -C /usr/local/bin 2>/dev/null || true && \
+    curl -sL $(curl -s https://api.github.com/repos/tenable/terrascan/releases/latest 2>/dev/null | grep 'browser_download_url.*Linux_x86_64.tar.gz"' | cut -d'"' -f4) 2>/dev/null | tar -xz -C /usr/local/bin 2>/dev/null || true && \
+    curl -sL $(curl -s https://api.github.com/repos/sh1yo/x8/releases/latest 2>/dev/null | grep 'browser_download_url.*x86_64-linux"' | cut -d'"' -f4) 2>/dev/null -o /usr/local/bin/x8 && chmod +x /usr/local/bin/x8 || true && \
+    curl -sL https://raw.githubusercontent.com/docker/docker-bench-security/main/docker-bench-security.sh -o /usr/local/bin/docker-bench-security && chmod +x /usr/local/bin/docker-bench-security || true && \
+    git clone --depth 1 https://github.com/niklasb/libc-database /opt/libc-database 2>/dev/null && ln -sf /opt/libc-database/get /usr/local/bin/libc-database || true
 
 # Install Python dependencies from requirements.txt
 # Use --break-system-packages for Kali compatibility
-# Exclude angr (too large ~1.5 GB)
-# Note: Upgrade pip first to handle Debian/pip package conflicts
 COPY requirements.txt /tmp/requirements.txt
 RUN pip3 install --break-system-packages --upgrade pip setuptools wheel && \
-    grep -v '^angr' /tmp/requirements.txt | pip3 install --break-system-packages --no-cache-dir --ignore-installed -r /dev/stdin && \
+    pip3 install --break-system-packages --no-cache-dir --ignore-installed -r /tmp/requirements.txt && \
     rm /tmp/requirements.txt
 
 # Fix binary name mismatches for health check compatibility

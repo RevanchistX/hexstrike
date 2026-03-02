@@ -1,3 +1,12 @@
+Ollama setup payload:
+
+```
+        curl -X POST http://ollama:11434/api/pull \
+          -H 'Content-Type: application/json' \
+          -d '{"name":"qwen2.5:7b"}'
+```
+
+---
 <div align="center">
 
 <img src="assets/hexstrike-logo.png" alt="HexStrike AI Logo" width="220" style="margin-bottom: 20px;"/>

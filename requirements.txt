@@ -35,7 +35,6 @@ mitmproxy>=9.0.0,<11.0.0        # HTTP proxy (mitmproxy imports)
 # BINARY ANALYSIS (CONDITIONALLY USED)
 # ============================================================================
 pwntools>=4.10.0,<5.0.0         # Binary exploitation (from pwn import *)
-angr>=9.2.0,<10.0.0             # Binary analysis (import angr)
 bcrypt==4.0.1                   # Pin bcrypt version for passlib compatibility (fixes pwntools dependency issue)
 
 # ============================================================================
@@ -96,7 +95,5 @@ shodan>=1.28.0              # Shodan CLI → shodan binary
 prowler>=3.0.0              # Cloud security → prowler binary
 arjun>=2.2.1                # HTTP param discovery → arjun binary
 uro>=0.0.6                  # URL deduplication → uro binary
-paramspider>=2.0            # Parameter spider → paramspider binary
-spiderfoot>=4.0             # OSINT framework → spiderfoot binary
 censys>=2.2.0               # Censys CLI → censys binary
-hibp>=0.3.0                 # HIBP checker → hibp binary
+# hibp>=0.3.0               # HIBP checker → hibp binary (installed via git clone instead)
