@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HexStrike AI - Tool Dashboard</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='hexstrike-logo.png') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #c0c0c0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 2px solid #cc0000;
+            background: linear-gradient(to bottom, rgba(204, 0, 0, 0.15), transparent);
+            border-radius: 3px;
+        }
+
+        .logo {
+            max-width: 150px;
+            margin: 0 auto 15px;
+            display: block;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 5px;
+            color: #ff4444;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        p {
+            color: #999;
+            font-size: 0.95em;
+            margin-top: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: #cc0000;
+            color: #fff;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            color: #999;
+            font-size: 0.8em;
+            margin-bottom: 3px;
+        }
+
+        .stat-value {
+            color: #ff4444;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .uptime {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .tools-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #ff4444;
+            margin: 35px 0 20px 0;
+            padding: 12px 15px;
+            border-left: 4px solid #cc0000;
+            background: rgba(204, 0, 0, 0.1);
+            text-transform: capitalize;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-arrow {
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .tools-section.collapsed .section-arrow {
+            transform: rotate(-90deg);
+        }
+
+        .section-count {
+            color: #999;
+            font-size: 0.9em;
+            font-weight: normal;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .tools-section.collapsed .tools-grid {
+            display: none;
+        }
+
+        .tool-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 3px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tool-card:hover {
+            background: #252525;
+            border-color: #cc0000;
+            box-shadow: 0 0 8px rgba(204, 0, 0, 0.3);
+        }
+
+        .tool-icon {
+            font-size: 2em;
+            margin-bottom: 8px;
+            display: block;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-name {
+            font-size: 0.75em;
+            color: #ccc;
+            word-break: break-word;
+            margin-bottom: 6px;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tool-status {
+            font-size: 0.7em;
+            padding: 3px 6px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .status-available {
+            background: rgba(100, 150, 100, 0.4);
+            color: #90ee90;
+        }
+
+        .status-unavailable {
+            background: rgba(150, 100, 100, 0.4);
+            color: #ff8888;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid #333;
+            color: #666;
+            font-size: 0.85em;
+        }
+
+        .footer a {
+            color: #ff4444;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+        }
+
+        .error {
+            color: #ff8888;
+            padding: 20px;
+            border: 1px solid #cc0000;
+            border-radius: 3px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .tools-grid {
+                grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            }
+
+            .logo {
+                max-width: 100px;
+            }
+
+            .stats-row {
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="{{ url_for('static', filename='hexstrike-logo.png') }}" alt="HexStrike Logo" class="logo">
+            <h1>▒ HexStrike AI ▒</h1>
+            <p>Advanced Penetration Testing Framework</p>
+            <div class="status-badge">● OPERATIONAL</div>
+            <div class="stats-row" id="stats-row"></div>
+            <div class="uptime" id="uptime"></div>
+        </header>
+
+        <div id="content"></div>
+
+        <footer>
+            <p>HexStrike AI v6.0 | Web Penetration Testing Framework</p>
+            <p><a href="/health">📊 View Full Health Report</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const toolEmojis = {
+            'nmap': '🗺️', 'gobuster': '🔍', 'dirb': '📁', 'nikto': '🎯', 'sqlmap': '💉',
+            'hydra': '🔑', 'john': '🔐', 'hashcat': '⚡', 'ffuf': '🌪️', 'dirsearch': '📂',
+            'sqlmap': '💉', 'wfuzz': '🎲', 'xsser': '⚔️', 'paramspider': '🕷️', 'arjun': '🔦',
+            'wafw00f': '🛡️', 'burpsuite': '🍔', 'zaproxy': '⚡', 'httpx': '📡', 'katana': '⚔️',
+            'gau': '🐕', 'waybackurls': '🔙', 'hakrawler': '🕷️', 'jaeles': '💣', 'dalfox': '🦊',
+            'masscan': '🚀', 'arp-scan': '🔎', 'enum4linux': '🐧', 'smbmap': '🗂️', 'responder': '🎭',
+            'gdb': '🐛', 'radare2': '🔬', 'binwalk': '🧭', 'ropgadget': '🎯', 'checksec': '✓',
+            'volatility3': '🧠', 'steghide': '🤫', 'exiftool': '📸', 'testdisk': '💾', 'zsteg': '🎨',
+            'prowler': '🐾', 'kube-hunter': '☸️', 'docker-bench-security': '🐳', 'amass': '🔎',
+            'subfinder': '🔍', 'fierce': '😡', 'theharvester': '🌾', 'recon-ng': '🕵️',
+            'metasploit': '💣', 'searchsploit': '🔎', 'nuclei': '💥', 'wpscan': '📝',
+            'graphql-cop': '📊', 'graphql-scanner': '📡', 'jwt_tool': '🔐', 'evil-winrm': '🪟',
+            'aircrack-ng': '📶', 'tshark': '🐠', 'tcpdump': '📦', 'kismet': '📶',
+            'curl': '🌀', 'httpie': '🌐', 'anew': '✨', 'qsreplace': '🔄', 'uro': '🔀',
+            'bandit': '💥', 'safety': '🛡️', 'semgrep': '🔍', 'truffleHog': '🐷', 'osv': '🔒',
+            'pip-audit': '📋', 'censys-cli': '🔍', 'sherlock': '🔎', 'shodan-cli': '👁️',
+            'patator': '⚙️', 'hash-identifier': '🏷️', 'volatility': '💨', 'sleuthkit': '🔍'
+        };
+
+        function getToolEmoji(toolName) {
+            return toolEmojis[toolName] || '🔧';
+        }
+
+        function toggleSection(element) {
+            element.parentElement.classList.toggle('collapsed');
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+
+                // Update header stats
+                const statsRow = document.getElementById('stats-row');
+                statsRow.innerHTML = `
+                    <div class="stat-item">
+                        <div class="stat-label">Total Tools</div>
+                        <div class="stat-value">${data.total_tools_available}/${data.total_tools_count}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Coverage</div>
+                        <div class="stat-value">${Math.round((data.total_tools_available / data.total_tools_count) * 100)}%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" style="color: #90ee90;">✓ Healthy</div>
+                    </div>
+                `;
+
+                // Update uptime
+                const hours = Math.floor(data.uptime / 3600);
+                const minutes = Math.floor((data.uptime % 3600) / 60);
+                const seconds = Math.floor(data.uptime % 60);
+                document.getElementById('uptime').textContent = `Uptime: ${hours}h ${minutes}m ${seconds}s`;
+
+                // Build tool sections from category_stats
+                const content = document.getElementById('content');
+                let html = '';
+
+                for (const [category, stats] of Object.entries(data.category_stats)) {
+                    const categoryTools = Object.entries(data.tools_status)
+                        .filter(([tool]) => {
+                            // Check if tool is in this category by checking availability
+                            return data.tools_status[tool] !== undefined;
+                        });
+
+                    html += `
+                        <div class="tools-section">
+                            <div class="section-title" onclick="toggleSection(this)">
+                                <span><span class="section-arrow">▼</span> [ ${category.replace(/_/g, ' ').toUpperCase()} ]</span>
+                                <span class="section-count">${stats.available}/${stats.total}</span>
+                            </div>
+                            <div class="tools-grid">
+                    `;
+
+                    // Get tools for this category from backend data
+                    Object.entries(data.tools_status).forEach(([tool, available]) => {
+                        // Simple heuristic: if category appears in tool name, include it
+                        // Or just show all tools since we're iterating all anyway
+                        const toolsByCategory = {
+                            'essential': ['nmap', 'gobuster', 'dirb', 'nikto', 'sqlmap', 'hydra', 'john', 'hashcat'],
+                            'web_security': ['ffuf', 'feroxbuster', 'dirsearch', 'dotdotpwn', 'xsser', 'wfuzz', 'gau', 'waybackurls', 'arjun', 'paramspider', 'x8', 'jaeles', 'dalfox', 'httpx', 'wafw00f', 'burpsuite', 'zaproxy', 'katana', 'hakrawler', 'safety', 'bandit', 'semgrep', 'truffleHog', 'retire'],
+                            'network': ['rustscan', 'masscan', 'autorecon', 'nbtscan', 'arp-scan', 'responder', 'nxc', 'enum4linux-ng', 'rpcclient', 'enum4linux'],
+                            'vuln_scanning': ['nuclei', 'wpscan', 'graphql-cop', 'graphql-scanner', 'jwt_tool', 'snyk', 'grype', 'osv', 'pip-audit'],
+                            'password': ['medusa', 'patator', 'hash-identifier', 'ophcrack', 'hashcat-utils'],
+                            'binary': ['gdb', 'radare2', 'binwalk', 'ropgadget', 'checksec', 'objdump', 'ghidra', 'pwntools', 'one-gadget', 'ropper', 'angr', 'libc-database', 'pwninit'],
+                            'forensics': ['volatility3', 'vol', 'steghide', 'hashpump', 'foremost', 'exiftool', 'strings', 'xxd', 'file', 'photorec', 'testdisk', 'scalpel', 'bulk-extractor', 'stegsolve', 'zsteg', 'outguess'],
+                            'cloud': ['prowler', 'scout-suite', 'trivy', 'kube-hunter', 'kube-bench', 'docker-bench-security', 'checkov', 'terrascan', 'falco', 'clair'],
+                            'osint': ['amass', 'subfinder', 'fierce', 'dnsenum', 'theharvester', 'sherlock', 'social-analyzer', 'recon-ng', 'maltego', 'spiderfoot', 'shodan-cli', 'censys-cli', 'have-i-been-pwned'],
+                            'exploitation': ['metasploit', 'exploit-db', 'searchsploit'],
+                            'api': ['api-schema-analyzer', 'postman', 'insomnia', 'curl', 'httpie', 'anew', 'qsreplace', 'uro'],
+                            'wireless': ['kismet', 'wireshark', 'tshark', 'tcpdump'],
+                            'additional': ['smbmap', 'volatility', 'sleuthkit', 'autopsy', 'evil-winrm', 'paramspider', 'airmon-ng', 'airodump-ng', 'aireplay-ng', 'aircrack-ng', 'jwt_tool']
+                        };
+
+                        const categoryTools = toolsByCategory[category] || [];
+                        if (categoryTools.includes(tool)) {
+                            const statusClass = available ? 'status-available' : 'status-unavailable';
+                            const statusText = available ? '✓ Available' : '✗ Missing';
+                            html += `
+                                <div class="tool-card">
+                                    <div class="tool-icon">${getToolEmoji(tool)}</div>
+                                    <div class="tool-name">${tool.replace(/_/g, '-')}</div>
+                                    <div class="tool-status ${statusClass}">${statusText}</div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+
+                content.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('content').innerHTML =
+                    `<div class="error">❌ Error loading dashboard. Please refresh the page.</div>`;
+            }
+        }
+
+        // Load dashboard on page load and refresh every 60 seconds
+        loadDashboard();
+        setInterval(loadDashboard, 60000);
+    </script>
+</body>
+</html>

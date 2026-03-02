@@ -39,7 +39,7 @@ import shutil
 import venv
 import zipfile
 from pathlib import Path
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import psutil
 import signal
 import requests
@@ -60,10 +60,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
-import mitmproxy
-from mitmproxy import http as mitmhttp
-from mitmproxy.tools.dump import DumpMaster
-from mitmproxy.options import Options as MitmOptions
 
 # ============================================================================
 # LOGGING CONFIGURATION (MUST BE FIRST)
@@ -91,7 +87,10 @@ except PermissionError:
 logger = logging.getLogger(__name__)
 
 # Flask app configuration
-app = Flask(__name__)
+app = Flask(__name__,
+           template_folder='templates',
+           static_folder='assets',
+           static_url_path='/assets')
 app.config['JSON_SORT_KEYS'] = False
 
 # API Configuration
@@ -9018,11 +9017,90 @@ class FileOperationsManager:
 # Global file operations manager
 file_manager = FileOperationsManager()
 
+# ============================================================================
+# TOOL ICONS & DASHBOARD
+# ============================================================================
+
+TOOL_ICONS = {
+    # Web Security
+    "ffuf": "🔍", "httpx": "🌐", "dirsearch": "📁", "wfuzz": "💣", "wafw00f": "🛡️",
+    "xsser": "❌", "arjun": "🔎", "sqlmap": "💾", "paramspider": "🕷️", "dalfox": "🦊",
+    "katana": "⚔️", "hakrawler": "🕷️", "gau": "📊", "waybackurls": "⏮️", "burpsuite": "🔧",
+    "zaproxy": "⚡", "feroxbuster": "💨", "x8": "❌", "jaeles": "🎯", "dotdotpwn": "📂",
+
+    # Network & Reconnaissance
+    "nmap": "🗺️", "masscan": "📡", "rustscan": "🦀", "autorecon": "🤖", "amass": "🌐",
+    "subfinder": "🔍", "fierce": "⚔️", "dnsenum": "🔤", "theharvester": "👨‍🌾", "responder": "📢",
+    "netexec": "🔌", "enum4linux": "🐧", "enum4linux-ng": "🐧", "rpcclient": "🔐",
+    "arp-scan": "🔗", "nbtscan": "🎯",
+
+    # Vulnerability Scanning
+    "nuclei": "💥", "wpscan": "📝", "nikto": "🎯", "graphql-cop": "📊", "graphql-scanner": "📡", "jwt_tool": "🔐",
+
+    # Password & Cracking
+    "hydra": "💧", "john": "🔓", "hashcat": "💻", "medusa": "🐍", "patator": "🔄",
+    "hash-identifier": "🆔", "ophcrack": "🔐", "hashcat-utils": "🛠️",
+
+    # Binary Analysis & Reverse Engineering
+    "gdb": "🐛", "radare2": "🔬", "binwalk": "🗺️", "ropgadget": "💎", "checksec": "✅",
+    "objdump": "📋", "ghidra": "👻", "pwntools": "⚙️", "one-gadget": "💎", "ropper": "🎪",
+    "angr": "🤖", "libc-database": "📚", "pwninit": "🏁", "strings": "📝", "file": "📄",
+
+    # Forensics & Analysis
+    "volatility3": "💾", "vol": "💾", "autopsy": "🔍", "sleuthkit": "🔦", "steghide": "🤫",
+    "exiftool": "📸", "photorec": "📸", "testdisk": "💾", "scalpel": "🔪", "bulk-extractor": "📦",
+    "stegsolve": "🎨", "zsteg": "🎭", "outguess": "🤐", "foremost": "🎯", "hashpump": "💧",
+    "xxd": "🔢",
+
+    # Cloud & Container Security
+    "prowler": "🔍", "scout-suite": "👁️", "trivy": "⚠️", "kube-hunter": "🎯", "kube-bench": "✅",
+    "docker-bench-security": "🐳", "checkov": "✅", "terrascan": "🌍", "falco": "🦅", "clair": "🔍",
+
+    # OSINT
+    "sherlock": "🔍", "social-analyzer": "👥", "recon-ng": "🔍", "maltego": "🔗", "spiderfoot": "🕷️",
+    "shodan-cli": "🔍", "censys-cli": "🔍", "have-i-been-pwned": "⚠️",
+
+    # Exploitation & Frameworks
+    "metasploit": "💣", "exploit-db": "📚", "searchsploit": "🔍", "msfvenom": "🧬", "msfconsole": "💻",
+    "evil-winrm": "👿",
+
+    # API Tools
+    "curl": "📡", "httpie": "📡", "postman": "✉️", "insomnia": "😴", "api-schema-analyzer": "📊",
+    "anew": "✨", "qsreplace": "🔄", "uro": "🌊",
+
+    # Wireless
+    "kismet": "📶", "wireshark": "🦈", "tshark": "🦈", "tcpdump": "📦", "aircrack-ng": "📶",
+    "airmon-ng": "📡", "airodump-ng": "📡", "aireplay-ng": "⚡",
+
+    # Additional
+    "smbmap": "📂", "volatility": "💾", "nxc": "🔌",
+    "cve": "⚠️", "gobuster": "🔍", "dirb": "📁", "default": "🔧"
+}
+
+def get_tool_icon(tool_name):
+    """Get icon for a tool, with fallback to default"""
+    return TOOL_ICONS.get(tool_name, TOOL_ICONS.get("default", "🔧"))
+
+@app.route("/", methods=["GET"])
+def dashboard():
+    """Main dashboard showing tool status"""
+    try:
+        return render_template('dashboard.html')
+    except Exception as e:
+        logger.error(f"Error rendering dashboard: {str(e)}")
+        return jsonify({"error": f"Dashboard error: {str(e)}"}), 500
+
 # API Routes
 
 @app.route("/health", methods=["GET"])
 def health_check():
-    """Health check endpoint with comprehensive tool detection"""
+    """Health check endpoint with comprehensive tool detection - cached for performance"""
+
+    # Cache health check results for 60 seconds to avoid repeated tool detection
+    current_time = time.time()
+    if hasattr(health_check, 'cache') and hasattr(health_check, 'cache_time'):
+        if current_time - health_check.cache_time < 60:  # Cache valid for 60 seconds
+            return health_check.cache
 
     essential_tools = [
         "nmap", "gobuster", "dirb", "nikto", "sqlmap", "hydra", "john", "hashcat"
@@ -9120,7 +9198,7 @@ def health_check():
         "additional": {"total": len(additional_tools), "available": sum(1 for tool in additional_tools if tools_status.get(tool, False))}
     }
 
-    return jsonify({
+    result = jsonify({
         "status": "healthy",
         "message": "HexStrike AI Tools API Server is operational",
         "version": "6.0.0",
@@ -9133,6 +9211,12 @@ def health_check():
         "telemetry": telemetry.get_stats(),
         "uptime": time.time() - telemetry.stats["start_time"]
     })
+
+    # Cache the result for 60 seconds
+    health_check.cache = result
+    health_check.cache_time = time.time()
+
+    return result
 
 @app.route("/api/command", methods=["POST"])
 def generic_command():
